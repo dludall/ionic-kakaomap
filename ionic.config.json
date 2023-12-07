@@ -1,0 +1,7 @@
+{
+  "name": "samkakaoapi",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
