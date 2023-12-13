@@ -14,43 +14,41 @@ declare let kakao: any;
 export class HomePage implements OnInit{
 
   map: any;
+  constructor(private platform: Platform,) {}
+  async ngOnInit() {
 
-  chickenData:any={};
-
-  constructor(private platform: Platform,
-    ) {}
-  async ngOnInit() {    
-    await fetch("assets/chicken.json").then(res=> res.json()).then(json=>{
-      this.chickenData = json;
-    });
   }
 
   ionViewWillEnter(){
-    console.log("##########ionViewWillEnter ");
-    var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
-    const options = { //지도를 생성할 때 필요한 기본 옵션
-      center: new kakao.maps.LatLng(36.80825, 127.8692), //지도의 중심좌표.
-      level: 13, //지도의 레벨(확대, 축소 정도)
-    };
-    this.map =  new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
-    
-
-    // 마커 클러스터러를 생성합니다 
-    var clusterer = new kakao.maps.MarkerClusterer({
-      map: this.map, // 마커들을 클러스터로 관리하고 표시할 지도 객체 
-      averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정 
-      minLevel: 10 // 클러스터 할 최소 지도 레벨 
-    });
-
-    var markers = this.chickenData.positions.map((position: any)=>{
-      console.log(position);
-      return new kakao.maps.Marker({
-              position : new kakao.maps.LatLng(position.lat, position.lng)
-          });
-    });
-  //   console.log(markers.length);
-  // // // 클러스터러에 마커들을 추가합니다
-    clusterer.addMarkers(markers);
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+    mapOption = {
+      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+        level: 6 // 지도의 확대 레벨
+    };  
+    // 지도를 생성합니다    
+    this.map = new kakao.maps.Map(mapContainer, mapOption); 
+    // 주소-좌표 변환 객체를 생성합니다
+    var geocoder = new kakao.maps.services.Geocoder();
+    // 주소로 좌표를 검색합니다
+    geocoder.addressSearch('제주특별자치도 제주시 첨단로 242', (result:any, status:any)=> {
+    // 정상적으로 검색이 완료됐으면 
+      if (status === kakao.maps.services.Status.OK) {
+        console.log(JSON.stringify(result));
+        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+        // 결과값으로 받은 위치를 마커로 표시합니다
+        var marker = new kakao.maps.Marker({
+            map: this.map,
+            position: coords
+        });
+        // 인포윈도우로 장소에 대한 설명을 표시합니다
+        var infowindow = new kakao.maps.InfoWindow({
+            content: '<div style="width:150px;text-align:center;padding:6px 0;">우리회사</div>'
+        });
+        infowindow.open(this.map, marker);
+        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+        this.map.setCenter(coords);
+      } 
+    });    
 
   }
 
